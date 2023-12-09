@@ -1,3 +1,5 @@
+import javax.swing.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -5,10 +7,18 @@ public class CardStack {
     ArrayList<Card> cardStack;
     ArrayList<Card> flippedStack;
 
+    ArrayList<JLabel> cardJLabelStack;
+    ArrayList<JLabel> flippedJLabelStack;
+
+    int stackValue;
+
 
     public CardStack() {
         cardStack = new ArrayList<>();
         flippedStack = new ArrayList<>();
+        cardJLabelStack = new ArrayList<>();
+        flippedJLabelStack = new ArrayList<>();
+        stackValue = 0;
     }
 
     public void shuffle() {
@@ -71,14 +81,18 @@ public class CardStack {
 
     public void flipStack() {
         flippedStack.addAll(cardStack);
+        flippedJLabelStack.addAll(cardJLabelStack);
 
         cardStack.clear();
+        cardJLabelStack.clear();
     }
 
     public void unflipFlippedStack() {
         cardStack.addAll(flippedStack);
+        cardJLabelStack.addAll(flippedJLabelStack);
 
         flippedStack.clear();
+        flippedJLabelStack.clear();
     }
 
 }

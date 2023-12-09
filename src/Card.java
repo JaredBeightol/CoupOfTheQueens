@@ -1,14 +1,32 @@
+import java.util.Set;
+
 public class Card {
     private String pip;
     private String suit;
-
-
     private String suitAsciiArt;
+
+    private int value;
 
     public Card(String inPip, String inSuit, String inSuitAsciiArt) {
         pip = inPip;
         suit = inSuit;
         suitAsciiArt = inSuitAsciiArt;
+
+        if (Set.of("2", "3", "4", "5", "6", "7", "8", "9", "10").contains(inPip)) {
+            value = Integer.parseInt(inPip);
+        } else {
+            switch(inPip) {
+                case "A":
+                    value = 1;
+                    break;
+                case "J":
+                    value = 5;
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
+        }
     }
 
     public Card(String inPip, String inSuit) {
@@ -23,6 +41,22 @@ public class Card {
         } else if (inSuit.equals("Diamonds")) {
             suitAsciiArt = "♢";
         }
+
+        if (Set.of("2", "3", "4", "5", "6", "7", "8", "9", "10").contains(inPip)) {
+            value = Integer.parseInt(inPip);
+        } else {
+            switch(inPip) {
+                case "A":
+                    value = 1;
+                    break;
+                case "J":
+                    value = 5;
+                    break;
+                default:
+                    value = 0;
+                    break;
+            }
+        }
     }
 
     public Card() {
@@ -30,7 +64,7 @@ public class Card {
     }
 
     public String toString() {
-        return pip + " of " + suit;
+        return pip + suit;
     }
 
     public String toStringSymbol() {
@@ -60,6 +94,14 @@ public class Card {
 
     public void setSuitAsciiArt(String suitAsciiArt) {
         this.suitAsciiArt = suitAsciiArt;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
     }
 
 }
