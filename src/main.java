@@ -1,8 +1,5 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,6 +9,14 @@ import javax.swing.border.Border;
 public class main {
     // Buffered Reader to get input from console
     private static BufferedReader bufReader;
+
+    //Variables for window size
+    private static int WINDOW_WIDTH;
+    private static int WINDOW_HEIGHT;
+    private static int BIG_CARD_WIDTH;
+    private static int BIG_CARD_HEIGHT;
+    private static int SMALL_CARD_WIDTH;
+    private static int SMALL_CARD_HEIGHT;
 
     //The deck used for the games
     private static Deck deck;
@@ -45,13 +50,58 @@ public class main {
     public static void main(String[] args) {
         System.setProperty("sun.java2d.uiScale", "1.0");
 
+        //GAME WINDOW SIZE
+        WINDOW_WIDTH = 1800;
+        WINDOW_HEIGHT = 900;
+
+        BIG_CARD_WIDTH = WINDOW_WIDTH/15;
+        BIG_CARD_HEIGHT = (int)Math.round(BIG_CARD_WIDTH * 1.5);
+        SMALL_CARD_WIDTH = WINDOW_WIDTH/19;
+        SMALL_CARD_HEIGHT = (int)Math.round(SMALL_CARD_WIDTH * 1.5);
+
         //Sets up JFrame for game
         gameFrame = new JFrame();
         gameFrame.getContentPane().setBackground(new Color(42, 97, 54));
         gameFrame.setTitle("Coup of the Queens");
         gameFrame.setLayout(null);
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        gameFrame.setBounds(0, 0, 1500, 750);
+        gameFrame.setBounds(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+        //Sets listener for resizing gameFrame
+        gameFrame.addComponentListener(new ComponentAdapter()
+        {
+            public void componentResized(ComponentEvent evt) {
+                Component c = (Component) evt.getSource();
+                if (WINDOW_WIDTH != c.getWidth() || WINDOW_HEIGHT != c.getHeight()) {
+                    WINDOW_WIDTH = c.getWidth();
+                    WINDOW_HEIGHT = c.getHeight();
+
+                    gameFrame.getContentPane().removeAll();
+                    emptyLayeredPane();
+
+                    JButton restartGameButton = new JButton("Window Resized - Restart");
+                    restartGameButton.setFont(new Font("SansSerif", Font.PLAIN, (int) Math.round(WINDOW_HEIGHT / 37.5)));
+                    restartGameButton.setBounds(WINDOW_WIDTH / 1490, WINDOW_HEIGHT / 745, BIG_CARD_HEIGHT * 3, BIG_CARD_HEIGHT);
+                    restartGameButton.setLayout(null);
+                    gameFrame.add(restartGameButton);
+                    gameFrame.repaint();
+                    restartGameButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            BIG_CARD_WIDTH = WINDOW_WIDTH / 15;
+                            BIG_CARD_HEIGHT = WINDOW_HEIGHT / 5;
+                            SMALL_CARD_WIDTH = (int) Math.round(WINDOW_WIDTH / 18.75);
+                            SMALL_CARD_HEIGHT = (int) Math.round(WINDOW_HEIGHT / 6.25);
+                            gameFrame.getContentPane().removeAll();
+                            emptyLayeredPane();
+                            gameFrame.repaint();
+                            setup();
+                            startGame();
+                        }
+                    });
+                }
+            }
+        });
 
         //sets up key listener
         setupKeyListener();
@@ -103,7 +153,7 @@ public class main {
         gameEnd = false;
         layerPaneIndexCounter = 0;
         cardToPlayJLabel = new JLabel();
-        cardToPlayJLabel.setBounds(10,10,100,150);
+        cardToPlayJLabel.setBounds(WINDOW_WIDTH/150,WINDOW_HEIGHT/75, BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         cardToPlayJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
 
         queensideSpadeStack = new CardStack();
@@ -173,7 +223,7 @@ public class main {
             cardToPlay = deck.popTopCard();
             String imgFileName = (cardToPlay.toString() + ".png");
             ImageIcon cardImageIcon = new ImageIcon(new ImageIcon("src/CardImages/" + imgFileName)
-                    .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                    .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
             cardToPlayJLabel.setIcon(cardImageIcon);
             gameFrame.repaint();
 
@@ -450,113 +500,113 @@ public class main {
     public static void gameEnd() {
         //Display Queenside Points
         JLabel queensideSpadeCardJLabel = new JLabel();
-        queensideSpadeCardJLabel.setBounds(550 - ((queensideSpadeStack.cardStack.size() + queensideSpadeStack.flippedStack.size()) * 50),
-                20,80,120);
+        queensideSpadeCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideSpadeStack.cardStack.size() + queensideSpadeStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                WINDOW_HEIGHT/38, SMALL_CARD_WIDTH, BIG_CARD_HEIGHT);
         for (Card card : queensideSpadeStack.cardStack) {
             queensideSpadeStack.stackValue += card.getValue();
         }
         queensideSpadeCardJLabel.setText(Integer.toString(queensideSpadeStack.stackValue));
-        queensideSpadeCardJLabel.setSize(50,30);
-        queensideSpadeCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        queensideSpadeCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        queensideSpadeCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         queensideSpadeStack.cardJLabelStack.add(queensideSpadeCardJLabel);
         gameFrame.add(queensideSpadeCardJLabel);
 
         JLabel queensideHeartCardJLabel = new JLabel();
-        queensideHeartCardJLabel.setBounds(550 - ((queensideHeartStack.cardStack.size() + queensideHeartStack.flippedStack.size()) * 50),
-                180,80,120);
+        queensideHeartCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideHeartStack.cardStack.size() + queensideHeartStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                WINDOW_HEIGHT/4, BIG_CARD_WIDTH,BIG_CARD_HEIGHT);
         for (Card card : queensideHeartStack.cardStack) {
             queensideHeartStack.stackValue += card.getValue();
         }
         queensideHeartCardJLabel.setText(Integer.toString(queensideHeartStack.stackValue));
-        queensideHeartCardJLabel.setSize(50,30);
-        queensideHeartCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        queensideHeartCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        queensideHeartCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         queensideHeartStack.cardJLabelStack.add(queensideHeartCardJLabel);
         gameFrame.add(queensideHeartCardJLabel);
 
         JLabel queensideClubCardJLabel = new JLabel();
-        queensideClubCardJLabel.setBounds(550 - ((queensideClubStack.cardStack.size() + queensideClubStack.flippedStack.size()) * 50),
-                340,80,120);
+        queensideClubCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideClubStack.cardStack.size() + queensideClubStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/2.20588235),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : queensideClubStack.cardStack) {
             queensideClubStack.stackValue += card.getValue();
         }
         queensideClubCardJLabel.setText(Integer.toString(queensideClubStack.stackValue));
-        queensideClubCardJLabel.setSize(50,30);
-        queensideClubCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        queensideClubCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        queensideClubCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         queensideClubStack.cardJLabelStack.add(queensideClubCardJLabel);
         gameFrame.add(queensideClubCardJLabel);
 
         JLabel queensideDiamondCardJLabel = new JLabel();
-        queensideDiamondCardJLabel.setBounds(550 - ((queensideDiamondStack.cardStack.size() + queensideDiamondStack.flippedStack.size()) * 50),
-                500,80,120);
+        queensideDiamondCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideDiamondStack.cardStack.size() + queensideDiamondStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/1.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : queensideDiamondStack.cardStack) {
             queensideDiamondStack.stackValue += card.getValue();
         }
         queensideDiamondCardJLabel.setText(Integer.toString(queensideDiamondStack.stackValue));
-        queensideDiamondCardJLabel.setSize(50,30);
-        queensideDiamondCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        queensideDiamondCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        queensideDiamondCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         queensideDiamondStack.cardJLabelStack.add(queensideDiamondCardJLabel);
         gameFrame.add(queensideDiamondCardJLabel);
 
 
         //Display Kingside Points
         JLabel kingsideSpadeCardJLabel = new JLabel();
-        kingsideSpadeCardJLabel.setBounds(940 + ((kingsideSpadeStack.cardStack.size() + kingsideSpadeStack.flippedStack.size()) * 50),
-                20,80,120);
+        kingsideSpadeCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.59574468) + ((kingsideSpadeStack.cardStack.size() + kingsideSpadeStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/37.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : kingsideSpadeStack.cardStack) {
             kingsideSpadeStack.stackValue += card.getValue();
         }
         kingsideSpadeCardJLabel.setText(Integer.toString(kingsideSpadeStack.stackValue));
-        kingsideSpadeCardJLabel.setSize(50,30);
-        kingsideSpadeCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        kingsideSpadeCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        kingsideSpadeCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         kingsideSpadeStack.cardJLabelStack.add(kingsideSpadeCardJLabel);
         gameFrame.add(kingsideSpadeCardJLabel);
 
         JLabel kingsideHeartCardJLabel = new JLabel();
-        kingsideHeartCardJLabel.setBounds(940 + ((kingsideHeartStack.cardStack.size() + kingsideHeartStack.flippedStack.size()) * 50),
-                180,80,120);
+        kingsideHeartCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.59574468) + ((kingsideHeartStack.cardStack.size() + kingsideHeartStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/4.16666667),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : kingsideHeartStack.cardStack) {
             kingsideHeartStack.stackValue += card.getValue();
         }
         kingsideHeartCardJLabel.setText(Integer.toString(kingsideHeartStack.stackValue));
-        kingsideHeartCardJLabel.setSize(50,30);
-        kingsideHeartCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        kingsideHeartCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        kingsideHeartCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_HEIGHT/25));
         kingsideHeartStack.cardJLabelStack.add(kingsideHeartCardJLabel);
         gameFrame.add(kingsideHeartCardJLabel);
 
         JLabel kingsideClubCardJLabel = new JLabel();
-        kingsideClubCardJLabel.setBounds(940 + ((kingsideClubStack.cardStack.size() + kingsideClubStack.flippedStack.size()) * 50),
-                340,80,120);
+        kingsideClubCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.59574468) + ((kingsideClubStack.cardStack.size() + kingsideClubStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/2.20588235),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : kingsideClubStack.cardStack) {
             kingsideClubStack.stackValue += card.getValue();
         }
         kingsideClubCardJLabel.setText(Integer.toString(kingsideClubStack.stackValue));
-        kingsideClubCardJLabel.setSize(50,30);
-        kingsideClubCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        kingsideClubCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        kingsideClubCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         kingsideClubStack.cardJLabelStack.add(kingsideClubCardJLabel);
         gameFrame.add(kingsideClubCardJLabel);
 
         JLabel kingsideDiamondCardJLabel = new JLabel();
-        kingsideDiamondCardJLabel.setBounds(940 + ((kingsideDiamondStack.cardStack.size() + kingsideDiamondStack.flippedStack.size()) * 50),
-                500,80,120);
+        kingsideDiamondCardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.59574468) + ((kingsideDiamondStack.cardStack.size() + kingsideDiamondStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                (int)Math.round(WINDOW_HEIGHT/1.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
         for (Card card : kingsideDiamondStack.cardStack) {
             kingsideDiamondStack.stackValue += card.getValue();
         }
         kingsideDiamondCardJLabel.setText(Integer.toString(kingsideDiamondStack.stackValue));
-        kingsideDiamondCardJLabel.setSize(50,30);
-        kingsideDiamondCardJLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        kingsideDiamondCardJLabel.setSize(WINDOW_WIDTH/30,WINDOW_HEIGHT/25);
+        kingsideDiamondCardJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/50));
         kingsideDiamondStack.cardJLabelStack.add(kingsideDiamondCardJLabel);
         gameFrame.add(kingsideDiamondCardJLabel);
 
         calculateWinner();
 
         cardToPlayJLabel.setIcon(new ImageIcon(new ImageIcon("src/CardImages/CardBack.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH)));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH)));
 
         gameFrame.repaint();
 
         JButton restartGameButton = new JButton("Restart");
-        restartGameButton.setFont(new Font("SansSerif", Font.PLAIN, 20));
-        restartGameButton.setBounds(10,645,150,50);
+        restartGameButton.setFont(new Font("SansSerif", Font.PLAIN, (int)Math.round(WINDOW_HEIGHT/37.5)));
+        restartGameButton.setBounds(WINDOW_WIDTH/150 ,(int)Math.round(WINDOW_HEIGHT/1.1627907), BIG_CARD_HEIGHT,BIG_CARD_HEIGHT/3);
         restartGameButton.setLayout(null);
         gameFrame.add(restartGameButton);
         gameFrame.repaint();
@@ -576,42 +626,7 @@ public class main {
     }
 
     public static void displayBoard() {
-        System.out.print("\n\nQUEEN: ");
-        for (Card card : queensideSpadeStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\nKING:  ");
-        for (Card card : kingsideSpadeStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\n\n");
-        System.out.print("QUEEN: ");
-        for (Card card : queensideHeartStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\nKING:  ");
-        for (Card card : kingsideHeartStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\n\n");
-        System.out.print("QUEEN: ");
-        for (Card card : queensideClubStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\nKING:  ");
-        for (Card card : kingsideClubStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\n\n");
-        System.out.print("QUEEN: ");
-        for (Card card : queensideDiamondStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\nKING:  ");
-        for (Card card : kingsideDiamondStack.cardStack) {
-            System.out.print(card.toStringSymbol() + "  ");
-        }
-        System.out.print("\n\n");
+
     }
 
     /**
@@ -619,58 +634,58 @@ public class main {
      */
     public static void addKQToGameFrame() {
         ImageIcon kSpadeImageIcon = new ImageIcon(new ImageIcon("src/CardImages/KSpades.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel kSpadeJLabel = new JLabel(kSpadeImageIcon);
-        kSpadeJLabel.setBounds(760, 10, 100, 150);
+        kSpadeJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.97368421), WINDOW_HEIGHT/150 , BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         kSpadeJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(kSpadeJLabel);
 
         ImageIcon qSpadeImageIcon = new ImageIcon(new ImageIcon("src/CardImages/QSpades.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel qSpadeJLabel = new JLabel(qSpadeImageIcon);
-        qSpadeJLabel.setBounds(650, 10, 100, 150);
+        qSpadeJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.30769231), WINDOW_HEIGHT/150 , BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         qSpadeJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(qSpadeJLabel);
 
         ImageIcon kHeartImageIcon = new ImageIcon(new ImageIcon("src/CardImages/KHearts.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel kHeartJLabel = new JLabel(kHeartImageIcon);
-        kHeartJLabel.setBounds(760, 170, 100, 150);
+        kHeartJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.97368421), (int)Math.round(WINDOW_HEIGHT/4.41176471), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         kHeartJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(kHeartJLabel);
 
         ImageIcon qHeartImageIcon = new ImageIcon(new ImageIcon("src/CardImages/QHearts.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel qHeartJLabel = new JLabel(qHeartImageIcon);
-        qHeartJLabel.setBounds(650, 170, 100, 150);
+        qHeartJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.30769231), (int)Math.round(WINDOW_HEIGHT/4.41176471), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         qHeartJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(qHeartJLabel);
 
         ImageIcon kClubImageIcon = new ImageIcon(new ImageIcon("src/CardImages/KClubs.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel kClubJLabel = new JLabel(kClubImageIcon);
-        kClubJLabel.setBounds(760, 330, 100, 150);
+        kClubJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.97368421), (int)Math.round(WINDOW_HEIGHT/2.27272727), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         kClubJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(kClubJLabel);
 
         ImageIcon qClubImageIcon = new ImageIcon(new ImageIcon("src/CardImages/QClubs.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel qClubJLabel = new JLabel(qClubImageIcon);
-        qClubJLabel.setBounds(650, 330, 100, 150);
+        qClubJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.30769231), (int)Math.round(WINDOW_HEIGHT/2.27272727), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         qClubJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(qClubJLabel);
 
         ImageIcon kDiamondImageIcon = new ImageIcon(new ImageIcon("src/CardImages/KDiamonds.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel kDiamondJLabel = new JLabel(kDiamondImageIcon);
-        kDiamondJLabel.setBounds(760, 490, 100, 150);
+        kDiamondJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.97368421), (int)Math.round(WINDOW_HEIGHT/1.53061224), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         kDiamondJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(kDiamondJLabel);
 
         ImageIcon qDiamondImageIcon = new ImageIcon(new ImageIcon("src/CardImages/QDiamonds.png")
-                .getImage().getScaledInstance(100, 150, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(BIG_CARD_WIDTH, BIG_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel qDiamondJLabel = new JLabel(qDiamondImageIcon);
-        qDiamondJLabel.setBounds(650, 490, 100, 150);
+        qDiamondJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.30769231), (int)Math.round(WINDOW_HEIGHT/1.53061224), BIG_CARD_WIDTH, BIG_CARD_HEIGHT);
         qDiamondJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
         gameFrame.add(qDiamondJLabel);
 
@@ -685,28 +700,28 @@ public class main {
     public static void addQueensideCardToGameFrame(Card card) {
         String imgFileName = (card.toString() + ".png");
         ImageIcon cardImageIcon = new ImageIcon(new ImageIcon("src/CardImages/" + imgFileName)
-                .getImage().getScaledInstance(80, 120, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(SMALL_CARD_WIDTH, SMALL_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel cardJLabel = new JLabel(cardImageIcon);
         cardJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
 
         if (card.getSuit().equals("Spades")) {
-            cardJLabel.setBounds(550 - ((queensideSpadeStack.cardStack.size() + queensideSpadeStack.flippedStack.size()) * 50),
-                    20,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideSpadeStack.cardStack.size() + queensideSpadeStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/37.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, queensideSpadeStack.cardStack.size() + queensideSpadeStack.flippedStack.size() + 1);
             queensideSpadeStack.cardJLabelStack.add(cardJLabel);
         }else if (card.getSuit().equals("Hearts")) {
-            cardJLabel.setBounds(550 - ((queensideHeartStack.cardStack.size() + queensideHeartStack.flippedStack.size()) * 50),
-                    180,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideHeartStack.cardStack.size() + queensideHeartStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/4.16666667),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, queensideHeartStack.cardStack.size() + queensideHeartStack.flippedStack.size() + 1);
             queensideHeartStack.cardJLabelStack.add(cardJLabel);
         } else if (card.getSuit().equals("Clubs")) {
-            cardJLabel.setBounds(550 - ((queensideClubStack.cardStack.size() + queensideClubStack.flippedStack.size()) * 50),
-                    340,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideClubStack.cardStack.size() + queensideClubStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/2.20588235),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, queensideClubStack.cardStack.size() + queensideClubStack.flippedStack.size() + 1);
             queensideClubStack.cardJLabelStack.add(cardJLabel);
         } else if (card.getSuit().equals("Diamonds")) {
-            cardJLabel.setBounds(550 - ((queensideDiamondStack.cardStack.size() + queensideDiamondStack.flippedStack.size()) * 50),
-                    500,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/2.72727273) - ((queensideDiamondStack.cardStack.size() + queensideDiamondStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/1.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, queensideDiamondStack.cardStack.size() + queensideDiamondStack.flippedStack.size() + 1);
             queensideDiamondStack.cardJLabelStack.add(cardJLabel);
         }
@@ -723,28 +738,28 @@ public class main {
     public static void addKingsideCardToGameFrame(Card card) {
         String imgFileName = (card.toString() + ".png");
         ImageIcon cardImageIcon = new ImageIcon(new ImageIcon("src/CardImages/" + imgFileName)
-                .getImage().getScaledInstance(80, 120, Image.SCALE_SMOOTH));
+                .getImage().getScaledInstance(SMALL_CARD_WIDTH, SMALL_CARD_HEIGHT, Image.SCALE_SMOOTH));
         JLabel cardJLabel = new JLabel(cardImageIcon);
         cardJLabel.setBorder(BorderFactory.createLineBorder(Color.black));
 
         if (card.getSuit().equals("Spades")) {
-            cardJLabel.setBounds(880 + ((kingsideSpadeStack.cardStack.size() + kingsideSpadeStack.flippedStack.size()) * 50),
-                    20,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.70454545) + ((kingsideSpadeStack.cardStack.size() + kingsideSpadeStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/37.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, kingsideSpadeStack.cardStack.size() + kingsideSpadeStack.flippedStack.size() + 1);
             kingsideSpadeStack.cardJLabelStack.add(cardJLabel);
         }else if (card.getSuit().equals("Hearts")) {
-            cardJLabel.setBounds(880 + ((kingsideHeartStack.cardStack.size() + kingsideHeartStack.flippedStack.size()) * 50),
-                    180,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.70454545) + ((kingsideHeartStack.cardStack.size() + kingsideHeartStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/4.16666667),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, kingsideHeartStack.cardStack.size() + kingsideHeartStack.flippedStack.size() + 1);
             kingsideHeartStack.cardJLabelStack.add(cardJLabel);
         } else if (card.getSuit().equals("Clubs")) {
-            cardJLabel.setBounds(880 + ((kingsideClubStack.cardStack.size() + kingsideClubStack.flippedStack.size()) * 50),
-                    340,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.70454545) + ((kingsideClubStack.cardStack.size() + kingsideClubStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/2.20588235),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, kingsideClubStack.cardStack.size() + kingsideClubStack.flippedStack.size() + 1);
             kingsideClubStack.cardJLabelStack.add(cardJLabel);
         } else if (card.getSuit().equals("Diamonds")) {
-            cardJLabel.setBounds(880 + ((kingsideDiamondStack.cardStack.size() + kingsideDiamondStack.flippedStack.size()) * 50),
-                    500,80,120);
+            cardJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.70454545) + ((kingsideDiamondStack.cardStack.size() + kingsideDiamondStack.flippedStack.size()) * WINDOW_WIDTH/30),
+                    (int)Math.round(WINDOW_HEIGHT/1.5),SMALL_CARD_WIDTH,SMALL_CARD_HEIGHT);
             gameFrame.getLayeredPane().add(cardJLabel, kingsideDiamondStack.cardStack.size() + kingsideDiamondStack.flippedStack.size() + 1);
             kingsideDiamondStack.cardJLabelStack.add(cardJLabel);
         }
@@ -757,7 +772,7 @@ public class main {
     public static void flipJLabelStack(CardStack cardStack) {
         for (JLabel cardJLabel: cardStack.flippedJLabelStack) {
             cardJLabel.setIcon(new ImageIcon(new ImageIcon("src/CardImages/CardBack.png")
-                    .getImage().getScaledInstance(80, 120, Image.SCALE_SMOOTH)));
+                    .getImage().getScaledInstance(SMALL_CARD_WIDTH, SMALL_CARD_HEIGHT, Image.SCALE_SMOOTH)));
         }
 
         gameFrame.repaint();
@@ -772,7 +787,7 @@ public class main {
             fileName = cardStack.flippedStack.get(i).toString() + ".png";
 
             cardJLabel.setIcon(new ImageIcon(new ImageIcon("src/CardImages/" + fileName)
-                    .getImage().getScaledInstance(80, 120, Image.SCALE_SMOOTH)));
+                    .getImage().getScaledInstance(SMALL_CARD_WIDTH, SMALL_CARD_HEIGHT, Image.SCALE_SMOOTH)));
         }
 
         gameFrame.repaint();
@@ -874,8 +889,8 @@ public class main {
 
 
         JLabel winnerJLabel = new JLabel();
-        winnerJLabel.setBounds(1100, 450, 400,450);
-        winnerJLabel.setFont(new Font("SansSerif", Font.BOLD, 50));
+        winnerJLabel.setBounds((int)Math.round(WINDOW_WIDTH/1.36363636), (int)Math.round(WINDOW_HEIGHT/1.66666667), (int)Math.round(WINDOW_WIDTH/3.75),(int)Math.round(WINDOW_HEIGHT/1.66666667));
+        winnerJLabel.setFont(new Font("SansSerif", Font.BOLD, WINDOW_WIDTH/30));
 
         if (queenSuitsWon > kingSuitsWon) {
             //queen win
@@ -891,4 +906,5 @@ public class main {
         winnerJLabel.setHorizontalAlignment(SwingConstants.LEFT);
         gameFrame.add(winnerJLabel);
     }
+
 }
