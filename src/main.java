@@ -43,6 +43,8 @@ public class main {
     private static JFrame gameFrame;
 
     public static void main(String[] args) {
+        System.setProperty("sun.java2d.uiScale", "1.0");
+
         //Sets up JFrame for game
         gameFrame = new JFrame();
         gameFrame.getContentPane().setBackground(new Color(42, 97, 54));
