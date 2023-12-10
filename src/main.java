@@ -555,7 +555,8 @@ public class main {
         gameFrame.repaint();
 
         JButton restartGameButton = new JButton("Restart");
-        restartGameButton.setBounds(10,665,100,30);
+        restartGameButton.setFont(new Font("SansSerif", Font.PLAIN, 20));
+        restartGameButton.setBounds(10,645,150,50);
         restartGameButton.setLayout(null);
         gameFrame.add(restartGameButton);
         gameFrame.repaint();
@@ -873,7 +874,7 @@ public class main {
 
 
         JLabel winnerJLabel = new JLabel();
-        winnerJLabel.setBounds(1100, 460, 400,450);
+        winnerJLabel.setBounds(1100, 450, 400,450);
         winnerJLabel.setFont(new Font("SansSerif", Font.BOLD, 50));
 
         if (queenSuitsWon > kingSuitsWon) {
